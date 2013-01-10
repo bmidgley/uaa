@@ -140,8 +140,6 @@ These values can be the same ascii value, for example you might see them
 as “tokensecret” in test environments. That is how symmetric key
 encryption is set up.
 
-(Add details for creating pub/priv keys here?)
-
 Autoapprove in the client section specifies for which clients the UAA
 should not require the user to approve a token grant expicitly. This
 avoids redundant and annoying requests to grant permission when there is
@@ -187,7 +185,7 @@ scim:
 
   users:
 
-    - sre@vmware.com\|passw\|scim.write,scim.read,openid
+    - sre@vmware.com\|apassword\|scim.write,scim.read,openid
 
 A scope cannot be added to a token granted by the UAA unless the user is
 in the corresponding group with the same name (some default groups are
@@ -232,12 +230,9 @@ Target tells uaac which server to talk to.
 
 uaac target uaa.cf116.dev.las01.vcsops.com # dev deployment
 
-uaac target
-`uaa.cfpartners.cloudfoundry.com <http://uaa.cfpartners.cloudfoundry.com/>`_ #
-production
+uaac target uaa.cfpartners.cloudfoundry.com # production
 
-uaac target `http://localhost:8080/uaa <http://localhost:8080/uaa>`_ #
-local dev
+uaac target localhost:8080/uaa # local dev
 
 uaac context will contain clients or an end user id. These are added to
 your context after authenticating.
@@ -356,7 +351,7 @@ vmc login # select space1
 
 vmc push # in an app dir
 
-Execute the yeti suite with retries for flaky apps
+Execute the yeti suite with retries in case of timeouts
 
 vmc target api.cf116.dev.las01.vcsops.com
 
