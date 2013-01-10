@@ -77,7 +77,7 @@ It’s best if you only have one version installed.
 
 Clone, build UAA server
 
-git clone `git@github.com <mailto:git@github.com>`_:cloudfoundry/uaa.git
+git clone git@github.com:cloudfoundry/uaa.git
 
 cd uaa
 
