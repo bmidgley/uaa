@@ -65,36 +65,47 @@ application, outside a bosh deployment scenario.
 
 Requirements:
 
-maven 3.0.4
+::
 
-java >= 1.6
+    maven 3.0.4
+    java >= 1.6
 
 Older versions of maven will likely appear to work at first but
 eventually fail with an unhelpful error. Be sure mvn -v reports 3.0.4.
 It’s best if you only have one version installed.
 
-Clone, build UAA server::
+Clone, build UAA server:
 
-git clone git@github.com:cloudfoundry/uaa.git
-cd uaa
-mvn clean install
+::
 
-Note the version <X> that you just built (e.g. look in the pom or in
+    git clone git@github.com:cloudfoundry/uaa.git
+    cd uaa
+    mvn clean install
+
+Note the version number that you just built (e.g. look in the pom or in
 uaa/target for the version label on the WAR file).
 
-Clone, build login-server::
+Clone, build login-server:
 
-git clone git@github.com:cloudfoundry/login-server.git
-cd login-server
-mvn clean install
+::
+
+    git clone git@github.com:cloudfoundry/login-server.git
+    cd login-server
+    mvn clean install
 
 Run Servers (using the UAA version <X> from above):
 
-cd login-server && mvn tomcat:run -P integration 
+::
 
-You can add -Didentity.version=<X> if you need a specific version built.
+    cd login-server && mvn tomcat:run -P integration 
 
-(or to just run the UAA: cd uaa && mvn tomcat7:run)
+You can add -Didentity.version=<X> if you need to match a specific UAA build.
+
+or to just run the UAA: 
+
+::
+
+    cd uaa && mvn tomcat7:run)
 
 Configuration
 =============
@@ -113,11 +124,13 @@ you choose a spring profile or a specific database configuration as a
 toplevel setting in uaa.yml. An example connecting to a postgres
 database:
 
-database:
-  driverClassName: org.postgresql.Driver
-  url: jdbc:postgresql://localhost:5432/uaadb
-  username: postgres
-  password:
+::
+
+    database:
+      driverClassName: org.postgresql.Driver
+      url: jdbc:postgresql://localhost:5432/uaadb
+      username: postgres
+      password:
 
 Token signing
 -------------
@@ -125,22 +138,23 @@ Token signing
 UAA can use either symmetric key encryption (shared secrets) or public
 key encryption.
 
-jwt:
-  token:
-    signing-key: …
-    verification-key: …
+::
 
-If you want to use symmetric key encryption, these values should be the same ascii value.
+    jwt:
+      token:
+        signing-key: …
+        verification-key: …
+
+If you want to use symmetric key encryption, signing and verification values should be the same.
 
 Generating new asymmetric key pairs
 
-mkdir temp\_uaa\_certs
+::
 
-cd temp\_uaa\_certs
-
-openssl genrsa -out privkey.pem 2048
-
-openssl rsa -pubout -in privkey.pem -out pubkey.pem
+    mkdir temp\_uaa\_certs
+    cd temp\_uaa\_certs
+    openssl genrsa -out privkey.pem 2048
+    openssl rsa -pubout -in privkey.pem -out pubkey.pem
 
 
 Clients
@@ -151,21 +165,25 @@ asked to approve a token grant expicitly. This
 avoids redundant and annoying requests to grant permission when there is
 not a reasonable need to ever deny them.
 
-oauth:
-  client:
-    autoapprove:
-      - vmc
-      - support-signon
+::
+
+    oauth:
+      client:
+        autoapprove:
+          - vmc
+          - support-signon
 
 Individual client settings in uaa.yml go in sections under “clients”
 using the client name::
 
-oauth:
-  clients:
-    account_manager:
-      override: true
-      scope: openid,cloud\_controller.read,cloud\_controller.write
-      authorities: openid,cloud\_controller.read,cloud\_controller.write
+::
+
+    oauth:
+      clients:
+        account_manager:
+          override: true
+          scope: openid,cloud\_controller.read,cloud\_controller.write
+          authorities: openid,cloud\_controller.read,cloud\_controller.write
 
 Override defaults to false; when true, the client settings in this
 section can override client settings saved if you have a persistent
@@ -192,9 +210,11 @@ Group membership will be updated automatically in a future release.
 scim is a toplevel attribute in uaa.yml. Login, password, and groups can
 be defined on the new user.
 
-scim:
-  users:
-    - sre@vmware.com\|apassword\|scim.write,scim.read,openid
+::
+
+    scim:
+      users:
+        - sre@vmware.com\|apassword\|scim.write,scim.read,openid
 
 A scope cannot be added to a token granted by the UAA unless the user is
 in the corresponding group with the same name (some default groups are
@@ -216,16 +236,18 @@ vms to look at are uaa, login, and the vm with your client application.
 
 Go the uaa machine to monitor logs with:
 
-bosh ssh uaa 0
+::
 
-tail -f /var/vcap/sys/log/uaa/uaa.log
+    bosh ssh uaa 0
+    tail -f /var/vcap/sys/log/uaa/uaa.log
 
 You can watch headers to confirm the kind of flow you want with tcpdump,
 for example if you ssh into the login server:
 
-bosh ssh login 0
+::
 
-sudo tcpdump 'tcp port 80 and host uaa.cf116.dev.las01.vcsops.com' -i any -A
+    bosh ssh login 0
+    sudo tcpdump 'tcp port 80 and host uaa.cf116.dev.las01.vcsops.com' -i any -A
 
 uaac and vmc can take a --trace option which shows each online interaction.
 
@@ -244,35 +266,27 @@ Live data viewing and manipulation
 
 vmc and uaac each need a target. vmc points to a cloud controller and uaac to a uaa instance.
 
-vmc target api.cf116.dev.las01.vcsops.com
+::
 
-uaac target uaa.cf116.dev.las01.vcsops.com # dev deployment
-
-uaac target uaa.cfpartners.cloudfoundry.com # production
-
-uaac target localhost:8080/uaa # local dev
+    vmc target api.cf116.dev.las01.vcsops.com
+    uaac target uaa.cf116.dev.las01.vcsops.com # dev deployment
+    uaac target uaa.cfpartners.cloudfoundry.com # production
+    uaac target localhost:8080/uaa # local dev
 
 uaac context will contain clients or an end user id. These are added to
 your context after authenticating.
 
-uaac token client get admin # default pass adminsecret
+::
 
-uaac token client get vmc
-
-uaac token client get dashboard # get dashboard context
+    uaac token client get admin # default pass adminsecret
+    uaac token client get vmc
+    uaac token client get dashboard # get dashboard context
 
 Learn about your context
 
-uaac contexts # show your target and all contexts with it
+::
 
-…
-
-  [0] [dashboard]
-      access\_token:  …
-      token\_type: bearer
-      expires\_in: 43199
-      scope: scim.write scim.read uaa.admin tokens.read uaa.resource
-      jti: e6bf7330-5141-4b13-b9ff-991d2d9c7519
+    uaac contexts # show your target and all contexts with it
 
 You see scopes granted through this token. jti is a token identifier,
 used for operations like deleting a token.
@@ -280,29 +294,33 @@ used for operations like deleting a token.
 Access to Users and Groups
 --------------------------
 
+User, group, and client changes below will be persisted if you have UAA backed by a persistent db.
+
 If your admin client is denied access to modify scim, you will need to
 add scim.write to its authorities list, delete and get the token again.
 
-uaac client update admin --authorities "clients.write clients.read uaa.admin scim.read scim.write"
+::
 
-uaac token delete
-
-uaac token client get admin
+    uaac client update admin --authorities "clients.write clients.read uaa.admin scim.read scim.write"
+    uaac token delete
+    uaac token client get admin
 
 Manage Users
 ------------
 
 The vmc client can be used for user registrations:
 
-vmc add-user --email sre@vmware.com # prompts for new password
+::
 
-uaac users # examine all users
-
-uaac user ids # look up user ids -- only works outside production
+    vmc add-user --email sre@vmware.com # prompts for new password
+    uaac users # examine all users
+    uaac user ids # look up user ids -- only works outside production
 
 Register a new user
 
-uaac user add
+::
+
+    uaac user add
 
 Manage Groups
 -------------
@@ -312,74 +330,67 @@ what can be delegated by this client or user.
 
 Make a user a member of the dashboard group to open the dashboard:
 
-uaac member add dashboard.user sre@vmware.com
+::
 
-uaac -t user add --given_name Bill --emails bt@vmware.com --password test bt@vmware.com
+    uaac member add dashboard.user sre@vmware.com
+    uaac -t user add --given_name Bill --emails bt@vmware.com --password test bt@vmware.com
 
 Manage client registrations
 ---------------------------
 
-uaac token client get admin # admin has client scopes
-uaac clients # list the clients uaa knows about
+Clients registrations can also be changed in a live system.
 
-…
+::
 
-  admin
-    scope: uaa.none
-    client\_id: admin
-    resource\_ids: none
-    authorized\_grant\_types: client\_credentials
-    authorities: clients.read clients.write uaa.admin clients.secret
+    uaac token client get admin # admin has client scopes
+    uaac clients # list the clients uaa knows about
 
-…
+Create new clients:
 
-uaac client add music\_server --scope openid,scim.read,scim.write
---authorized\_grant\_types client\_credentials --authorities oauth.login
+::
+
+    uaac client add music\_server --scope openid,scim.read,scim.write --authorized\_grant\_types client\_credentials --authorities oauth.login
 
 Run vcap yeti tests with a deployment
 -------------------------------------
 
 Put in .bash\_profile or another script you source:
 
-export VCAP\_BVT\_TARGET=api.cf116.dev.las01.vcsops.com
+::
 
-export VCAP\_BVT\_USER=sre@vmware.com
-
-export VCAP\_BVT\_USER\_PASSWD=the\_admin\_pw
+    export VCAP_BVT_TARGET=api.cf116.dev.las01.vcsops.com
+    export VCAP_BVT_USER=sre@vmware.com
+    export VCAP\_BVT\_USER\_PASSWD=the\_admin\_pw
 
 Make sre@vmware.com an admin if you want to do parallel yeti tests
 
-uaac user update sre@vmware.com --authorities "cloud\_controller.admin"
+::
+
+    uaac user update sre@vmware.com --authorities "cloud\_controller.admin"
 
 Manually deploy an app
 
-vmc login
+::
 
-vmc create-org org1
-
-vmc login
-
-vmc create-space space1
-
-vmc login # select space1
-
-vmc push # in an app dir
+    vmc login
+    vmc create-org org1
+    vmc login
+    vmc create-space space1
+    vmc login # select space1
+    vmc push # in an app dir
 
 Execute the yeti suite with retries in case of timeouts
 
-vmc target api.cf116.dev.las01.vcsops.com
+::
 
-vmc login # sre@vmware.com
-
-vmc add-user --email admin@vmware.com
-
-gerrit clone ssh://reviews.cloudfoundry.org:29418/vcap-yeti
-
-cd vcap-yeti
-git checkout
-./update
-
-bundle exec rake full rerun\_failure # admin@vmware.com test
+    vmc target api.cf116.dev.las01.vcsops.com
+    vmc login # sre@vmware.com
+    vmc add-user --email admin@vmware.com
+    git clone https://github.com/cloudfoundry/vcap-yeti.git
+    cd vcap-yeti
+    git checkout
+    ./update
+    bundle exec rake full rerun_failure # admin@vmware.com test
 
 UAA Signing
 -----------
@@ -390,11 +401,15 @@ of the UAA signing key if you are dealing with invalid token errors.
 This will print the public key without requiring a password if using
 public key verification:
 
-uaac signing key
+::
+
+    uaac signing key
 
 if access is denied, use client credentials that allow access to the symmetric key:
 
-vmc signing key -c admin -s adminsecret
+::
+
+    vmc signing key -c admin -s adminsecret
 
 Additional Resources
 ====================
