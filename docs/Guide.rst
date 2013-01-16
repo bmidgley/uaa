@@ -90,7 +90,9 @@ mvn clean install
 
 Run Servers (using the UAA version <X> from above):
 
-cd login-server && mvn tomcat:run -P integration -Didentity.version=<X>
+cd login-server && mvn tomcat:run -P integration 
+
+You can add -Didentity.version=<X> if you need a specific version built.
 
 (or to just run the UAA: cd uaa && mvn tomcat7:run)
 
@@ -128,11 +130,9 @@ jwt:
     signing-key: …
     verification-key: …
 
-These values can be the same ascii value, for example you might see them
-as “tokensecret” in test environments. That is how symmetric key
-encryption is set up.
+If you want to use symmetric key encryption, these values should be the same ascii value.
 
-Generating new key pairs
+Generating new asymmetric key pairs
 
 mkdir temp\_uaa\_certs
 
@@ -146,32 +146,34 @@ openssl rsa -pubout -in privkey.pem -out pubkey.pem
 Clients
 -------
 
-Autoapprove in the client section specifies for which clients the UAA
-should not require the user to approve a token grant expicitly. This
+Specify autoapprove in the client section when the user should not be 
+asked to approve a token grant expicitly. This
 avoids redundant and annoying requests to grant permission when there is
 not a reasonable need to ever deny them.
 
-client:
-  autoapprove:
-    - vmc
-    - support-signon
+oauth:
+  client:
+    autoapprove:
+      - vmc
+      - support-signon
 
 Individual client settings in uaa.yml go in sections under “clients”
 using the client name::
 
-clients:
-  account_manager:
-    override: true
-    scope: openid,cloud\_controller.read,cloud\_controller.write
-    authorities: openid,cloud\_controller.read,cloud\_controller.write
+oauth:
+  clients:
+    account_manager:
+      override: true
+      scope: openid,cloud\_controller.read,cloud\_controller.write
+      authorities: openid,cloud\_controller.read,cloud\_controller.write
 
 Override defaults to false; when true, the client settings in this
 section can override client settings saved if you have a persistent
 database. It’s recommended to have this property present and set to
 true; declare it as false only if you need the db to take precedence.
 
-Data describing access
-----------------------
+Access Control Data
+-------------------
 
 A scope specifies a privilege users can ask this client to assert on
 their behalf.
@@ -182,9 +184,10 @@ User Bootstrapping
 ------------------
 
 uaa.yml entries can used to set up users for development. This is not
-suitable for staging or production but useful in testing. The operation
-will be silently skipped if you specified a persistent db above and the
-user account exists.
+suitable for staging or production but useful in testing. If you specified 
+a persistent db above and the
+user account exists, it may not be updated with a new password. 
+Group membership will be updated automatically in a future release.
 
 scim is a toplevel attribute in uaa.yml. Login, password, and groups can
 be defined on the new user.
@@ -202,27 +205,39 @@ tokens.read, tokens.write).
 Bosh development & debug
 ========================
 
-In a bosh deployment you might not have the full flexibility of uaa.yml
-because you can only bind values from the manifest into the job (which
-has a template for uaa.yml).  
+Bosh deployments can be tricky to debug.
 
-Items to check here are the logs with reference to the flow that you are
-expecting. If any one point in the flow is broken, for example an
+You should examine the steps of the flow you are expecting and find 
+the point at which it misbehaves. If any one point in the flow is broken, for example an
 endpoint misconfigured or an identity test failing, you will see the
 flow break down at that point.
 
 vms to look at are uaa, login, and the vm with your client application.
 
-On the uaa machine, you could watch logs with:
+Go the uaa machine to monitor logs with:
+
+bosh ssh uaa 0
 
 tail -f /var/vcap/sys/log/uaa/uaa.log
 
 You can watch headers to confirm the kind of flow you want with tcpdump,
 for example if you ssh into the login server:
 
-bosh ssh uaa 0
+bosh ssh login 0
 
 sudo tcpdump 'tcp port 80 and host uaa.cf116.dev.las01.vcsops.com' -i any -A
+
+uaac and vmc can take a --trace option which shows each online interaction.
+
+"uaa target" your uaa if you haven't already.
+
+"uaac token decode" functions can be used to examine tokens. 
+Make sure attributes like scopes match what you expect. 
+This function can take a verification key to make sure the token is signed as you expect.
+
+"uaac signing key" can be used to get the signing key the uaa server is using. Pass -c and -s
+for a client to retrieve a symmetric key.
+
 
 Live data viewing and manipulation
 ==================================
