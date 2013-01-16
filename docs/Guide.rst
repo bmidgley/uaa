@@ -390,7 +390,7 @@ of the UAA signing key if you are dealing with invalid token errors.
 This will print the public key without requiring a password if using
 public key verification:
 
-vmc signing key
+uaac signing key
 
 if access is denied, use client credentials that allow access to the symmetric key:
 
