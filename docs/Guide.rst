@@ -174,7 +174,7 @@ not a reasonable need to ever deny them.
             - support-signon
 
 Individual client settings in uaa.yml go in sections under “clients”
-using the client name::
+using the client name:
 
 .. code-block:: yaml
 
@@ -214,7 +214,7 @@ be defined on the new user.
 
    scim:
       users:
-         - sre@vmware.com\|apassword\|scim.write,scim.read,openid
+         - sre@vmware.com|apassword|scim.write,scim.read,openid
 
 A scope cannot be added to a token granted by the UAA unless the user is
 in the corresponding group with the same name (some default groups are
