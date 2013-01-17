@@ -433,4 +433,3 @@ Improving this Document
 #. Hyperlink other documentation
 #. Link from main README
 #. Expand examples for tcpdump and debugging
-#. Rename this document to show it is the index, starting point, etc
