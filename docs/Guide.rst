@@ -124,13 +124,13 @@ you choose a spring profile or a specific database configuration as a
 toplevel setting in uaa.yml. An example connecting to a postgres
 database:
 
-::
+.. code-block:: yaml
 
-    database:
-      driverClassName: org.postgresql.Driver
-      url: jdbc:postgresql://localhost:5432/uaadb
-      username: postgres
-      password:
+   database:
+      driverClassName: org.postgresql.Driver
+      url: jdbc:postgresql://localhost:5432/uaadb
+      username: postgres
+      password: password
 
 Token signing
 -------------
@@ -138,12 +138,12 @@ Token signing
 UAA can use either symmetric key encryption (shared secrets) or public
 key encryption.
 
-::
+.. code-block:: yaml
 
-    jwt:
-      token:
-        signing-key: …
-        verification-key: …
+   jwt:
+      token:
+         signing-key: …
+         verification-key: …
 
 If you want to use symmetric key encryption, signing and verification values should be the same.
 
@@ -151,8 +151,8 @@ Generating new asymmetric key pairs
 
 ::
 
-    mkdir temp\_uaa\_certs
-    cd temp\_uaa\_certs
+    mkdir temp_uaa_certs
+    cd temp_uaa_certs
     openssl genrsa -out privkey.pem 2048
     openssl rsa -pubout -in privkey.pem -out pubkey.pem
 
@@ -165,25 +165,25 @@ asked to approve a token grant expicitly. This
 avoids redundant and annoying requests to grant permission when there is
 not a reasonable need to ever deny them.
 
-::
+.. code-block:: yaml
 
-    oauth:
+   oauth:
       client:
-        autoapprove:
-          - vmc
-          - support-signon
+         autoapprove:
+            - vmc
+            - support-signon
 
 Individual client settings in uaa.yml go in sections under “clients”
 using the client name::
 
-::
+.. code-block:: yaml
 
-    oauth:
+   oauth:
       clients:
-        account_manager:
-          override: true
-          scope: openid,cloud\_controller.read,cloud\_controller.write
-          authorities: openid,cloud\_controller.read,cloud\_controller.write
+         portal:
+            override: true
+            scope: openid,cloud_controller.read,cloud_controller.write
+            authorities: openid,cloud_controller.read,cloud_controller.write
 
 Override defaults to false; when true, the client settings in this
 section can override client settings saved if you have a persistent
@@ -210,11 +210,11 @@ Group membership will be updated automatically in a future release.
 scim is a toplevel attribute in uaa.yml. Login, password, and groups can
 be defined on the new user.
 
-::
+.. code-block:: yaml
 
-    scim:
-      users:
-        - sre@vmware.com\|apassword\|scim.write,scim.read,openid
+   scim:
+      users:
+         - sre@vmware.com\|apassword\|scim.write,scim.read,openid
 
 A scope cannot be added to a token granted by the UAA unless the user is
 in the corresponding group with the same name (some default groups are
@@ -349,7 +349,7 @@ Create new clients:
 
 ::
 
-    uaac client add music\_server --scope openid,scim.read,scim.write --authorized\_grant\_types client\_credentials --authorities oauth.login
+    uaac client add media_server --scope openid,scim.read,scim.write --authorized_grant_types client_credentials --authorities oauth.login
 
 Run vcap yeti tests with a deployment
 -------------------------------------
@@ -360,13 +360,13 @@ Put in .bash\_profile or another script you source:
 
     export VCAP_BVT_TARGET=api.cf116.dev.las01.vcsops.com
     export VCAP_BVT_USER=sre@vmware.com
-    export VCAP\_BVT\_USER\_PASSWD=the\_admin\_pw
+    export VCAP_BVT_USER_PASSWD=an_admin_pw
 
 Make sre@vmware.com an admin if you want to do parallel yeti tests
 
 ::
 
-    uaac user update sre@vmware.com --authorities "cloud\_controller.admin"
+    uaac user update sre@vmware.com --authorities "cloud_controller.admin"
 
 Manually deploy an app
 
